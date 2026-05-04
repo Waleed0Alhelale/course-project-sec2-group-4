@@ -1,78 +1,68 @@
-/*
-  Requirement: Populate the "Course Assignments" list page.
+const assignmentListSection = document.getElementById("assignment-list-section");
+const API_URL = "./api/index.php";
 
-  Instructions:
-  1. This file is already linked to `list.html` via:
-         <script src="list.js" defer></script>
+function getDescriptionPreview(description) {
+  const text = String(description || "").trim();
 
-  2. In `list.html`, the <section id="assignment-list-section"> is the
-     container that this script populates.
+  if (text.length <= 140) {
+    return text;
+  }
 
-  3. Implement the TODOs below.
+  return text.slice(0, 137) + "...";
+}
 
-  API base URL: ./api/index.php
-  Successful list response shape: { success: true, data: [ ...assignment objects ] }
-  Each assignment object shape:
-    {
-      id:          number,   // integer primary key from the assignments table
-      title:       string,
-      due_date:    string,   // "YYYY-MM-DD" — matches the SQL column name
-      description: string,
-      files:       string[]  // already decoded array of URL strings
-    }
-*/
-
-// --- Element Selections ---
-// TODO: Select the section for the assignment list using its
-//       id 'assignment-list-section'.
-
-// --- Functions ---
-
-/**
- * TODO: Implement createAssignmentArticle.
- *
- * Parameters:
- *   assignment — one object from the API response with the shape:
- *     {
- *       id:          number,
- *       title:       string,
- *       due_date:    string,   // "YYYY-MM-DD" — use due_date, not dueDate
- *       description: string,
- *       files:       string[]
- *     }
- *
- * Returns:
- *   An <article> element matching the structure shown in list.html:
- *     <article>
- *       <h2>{title}</h2>
- *       <p>Due: {due_date}</p>
- *       <p>{description}</p>
- *       <a href="details.html?id={id}">View Details &amp; Discussion</a>
- *     </article>
- *
- * Important: the href MUST be "details.html?id=<id>" (integer id from
- * the assignments table) so that details.js can read the id from the URL.
- */
 function createAssignmentArticle(assignment) {
-  // ... your implementation here ...
+  const article = document.createElement("article");
+
+  const title = document.createElement("h2");
+  title.textContent = assignment.title || "Untitled Assignment";
+
+  const dueDate = document.createElement("p");
+  dueDate.textContent = "Due: " + (assignment.due_date || "Not set");
+
+  const description = document.createElement("p");
+  description.textContent = getDescriptionPreview(assignment.description);
+
+  const detailsLink = document.createElement("a");
+  detailsLink.href = "details.html?id=" + encodeURIComponent(assignment.id);
+  detailsLink.textContent = "View Details & Discussion";
+
+  article.append(title, dueDate, description, detailsLink);
+  return article;
 }
 
-/**
- * TODO: Implement loadAssignments (async).
- *
- * It should:
- * 1. Use fetch() to GET data from './api/index.php'.
- *    The API returns JSON in the shape:
- *      { success: true, data: [ ...assignment objects ] }
- * 2. Parse the JSON response.
- * 3. Clear any existing content from the list section.
- * 4. Loop through the data array. For each assignment object:
- *    - Call createAssignmentArticle(assignment).
- *    - Append the returned <article> to the list section.
- */
 async function loadAssignments() {
-  // ... your implementation here ...
+  if (!assignmentListSection) {
+    return;
+  }
+
+  assignmentListSection.innerHTML = "<p>Loading assignments...</p>";
+
+  try {
+    const response = await fetch(API_URL);
+    const result = await response.json();
+
+    if (!response.ok || !result.success) {
+      throw new Error(result.message || "Unable to load assignments.");
+    }
+
+    assignmentListSection.innerHTML = "";
+
+    if (!Array.isArray(result.data) || result.data.length === 0) {
+      assignmentListSection.innerHTML = "<p>No assignments have been posted yet.</p>";
+      return;
+    }
+
+    result.data.forEach(function (assignment) {
+      assignmentListSection.appendChild(createAssignmentArticle(assignment));
+    });
+  } catch (error) {
+    assignmentListSection.innerHTML = "";
+
+    const message = document.createElement("p");
+    message.textContent = error.message || "Unable to load assignments.";
+    assignmentListSection.appendChild(message);
+  }
 }
 
-// --- Initial Page Load ---
 loadAssignments();

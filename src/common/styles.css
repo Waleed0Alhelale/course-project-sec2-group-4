@@ -1,1 +1,258 @@
-/* CSS Styles */
+:root {
+    --color-main: #2563eb;
+    --color-secondary: #1e40af;
+    --color-background: #f8fafc;
+    --color-card: #ffffff;
+    --color-text: #1f2937;
+    --color-muted: #6b7280;
+    --color-border: #e5e7eb;
+    --color-success: #16a34a;
+    --color-danger: #dc2626;
+    --font-main: "Segoe UI", Arial, sans-serif;
+}
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    background: var(--color-background);
+    color: var(--color-text);
+    font-family: var(--font-main);
+    line-height: 1.5;
+}
+
+a {
+    color: var(--color-main);
+    font-weight: 600;
+}
+
+a:hover {
+    color: var(--color-secondary);
+}
+
+h1,
+h2,
+h3,
+p {
+    margin-top: 0;
+}
+
+.container {
+    width: min(100% - 32px, 960px);
+    margin: 0 auto;
+    padding: 24px 0;
+}
+
+.container-wide {
+    width: min(100% - 32px, 1100px);
+}
+
+.navbar {
+    background: var(--color-card);
+    border-bottom: 1px solid var(--color-border);
+}
+
+.navbar .container {
+    padding: 24px 0;
+}
+
+.navbar h1 {
+    margin: 0;
+}
+
+.card {
+    background: var(--color-card);
+    border: 1px solid var(--color-border);
+    border-radius: 8px;
+    margin-bottom: 18px;
+    padding: 18px;
+}
+
+.btn,
+button {
+    border: 1px solid var(--color-border);
+    border-radius: 6px;
+    background: var(--color-card);
+    color: var(--color-text);
+    cursor: pointer;
+    display: inline-block;
+    font: inherit;
+    margin: 10px 8px 0 0;
+    padding: 9px 12px;
+}
+
+.btn:hover,
+button:hover {
+    border-color: var(--color-main);
+    color: var(--color-main);
+}
+
+.btn-primary,
+#add-assignment,
+#comment-form button[type="submit"],
+.edit-btn {
+    background: var(--color-main);
+    border-color: var(--color-main);
+    color: #ffffff;
+}
+
+.btn-primary:hover,
+#add-assignment:hover,
+#comment-form button[type="submit"]:hover,
+.edit-btn:hover {
+    background: var(--color-secondary);
+    border-color: var(--color-secondary);
+    color: #ffffff;
+}
+
+.btn-danger,
+.delete-btn {
+    background: var(--color-danger);
+    border-color: var(--color-danger);
+    color: #ffffff;
+}
+
+.btn-danger:hover,
+.delete-btn:hover {
+    background: #b91c1c;
+    border-color: #b91c1c;
+    color: #ffffff;
+}
+
+.form-group {
+    margin-top: 12px;
+}
+
+label {
+    display: block;
+    font-weight: 700;
+    margin-top: 12px;
+}
+
+input,
+textarea,
+select {
+    border: 1px solid var(--color-border);
+    border-radius: 6px;
+    color: var(--color-text);
+    display: block;
+    font: inherit;
+    margin-top: 6px;
+    padding: 10px;
+    width: 100%;
+}
+
+input:focus,
+textarea:focus,
+select:focus {
+    border-color: var(--color-main);
+    outline: 2px solid rgba(37, 99, 235, 0.18);
+}
+
+textarea {
+    min-height: 110px;
+    resize: vertical;
+}
+
+fieldset {
+    border: 1px solid var(--color-border);
+    border-radius: 8px;
+    padding: 16px;
+}
+
+legend {
+    color: var(--color-muted);
+    font-weight: 700;
+    padding: 0 6px;
+}
+
+.table-wrapper {
+    overflow-x: auto;
+}
+
+table {
+    border-collapse: collapse;
+    width: 100%;
+}
+
+th,
+td {
+    border: 1px solid var(--color-border);
+    padding: 10px;
+    text-align: left;
+    vertical-align: top;
+}
+
+th {
+    background: #eef2ff;
+    color: var(--color-secondary);
+}
+
+.assignments-page #assignment-list-section {
+    display: grid;
+    gap: 16px;
+}
+
+.assignments-page #assignment-list-section article,
+.assignment-card {
+    background: var(--color-card);
+    border: 1px solid var(--color-border);
+    border-radius: 8px;
+    padding: 18px;
+}
+
+.assignment-card h2,
+.assignments-page #assignment-list-section article h2,
+.assignment-details h2,
+.assignments-admin h2 {
+    margin-bottom: 10px;
+}
+
+.assignment-card p,
+.assignments-page #assignment-list-section article p,
+.assignment-details p {
+    color: var(--color-muted);
+}
+
+.assignment-details ul {
+    padding-left: 22px;
+}
+
+.assignment-comments article {
+    border-top: 1px solid var(--color-border);
+    padding-top: 14px;
+}
+
+.assignment-comments article:first-child {
+    border-top: 0;
+    padding-top: 0;
+}
+
+.assignment-comments footer {
+    color: var(--color-muted);
+    font-size: 0.95rem;
+}
+
+@media (max-width: 640px) {
+    .container,
+    .container-wide {
+        width: min(100% - 24px, 100%);
+        padding: 18px 0;
+    }
+
+    .card {
+        padding: 14px;
+    }
+
+    .btn,
+    button {
+        width: 100%;
+    }
+
+    th,
+    td {
+        padding: 8px;
+    }
+}
