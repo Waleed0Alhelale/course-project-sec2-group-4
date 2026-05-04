@@ -174,14 +174,8 @@ async function handleTableClick(event) {
     }
 
     try {
-      const response = await fetch(API_URL + "?action=delete", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-          id: id
-        })
+      const response = await fetch(API_URL + "?id=" + encodeURIComponent(id), {
+        method: "DELETE"
       });
 
       const result = await response.json();
@@ -249,6 +243,26 @@ async function loadAndInitialize() {
     row.appendChild(cell);
     assignmentsTbody.appendChild(row);
   }
+}
+
+if (typeof globalThis !== "undefined") {
+  globalThis.handleTableClick = handleTableClick;
+  globalThis.handleAddAssignment = handleAddAssignment;
+  globalThis.handleUpdateAssignment = handleUpdateAssignment;
+  globalThis.createAssignmentRow = createAssignmentRow;
+  globalThis.renderTable = renderTable;
+  globalThis.loadAndInitialize = loadAndInitialize;
+}
+
+if (typeof module !== "undefined" && module.exports) {
+  module.exports = {
+    createAssignmentRow,
+    renderTable,
+    handleAddAssignment,
+    handleUpdateAssignment,
+    handleTableClick,
+    loadAndInitialize
+  };
 }
 
 loadAndInitialize();
