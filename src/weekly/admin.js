@@ -31,9 +31,49 @@
 let weeks = [];
 
 // --- Element Selections ---
-// TODO: Select the week form by id 'week-form'.
+const API_URL = "./api/index.php";
+const weekForm = document.getElementById("week-form");
+const weeksTbody = document.getElementById("weeks-tbody");
+const submitButton = document.getElementById("add-week");
+const formHeading = document.getElementById("form-heading");
+const titleInput = document.getElementById("week-title");
+const startDateInput = document.getElementById("week-start-date");
+const descriptionInput = document.getElementById("week-description");
+const linksInput = document.getElementById("week-links");
 
-// TODO: Select the weeks table body by id 'weeks-tbody'.
+function normalizeLinks(links) {
+  return Array.isArray(links) ? links : [];
+}
+
+function getLinksFromTextarea() {
+  return linksInput.value
+    .split(/\r?\n/)
+    .map(function (url) {
+      return url.trim();
+    })
+    .filter(function (url) {
+      return url !== "";
+    });
+}
+
+function resetFormMode() {
+  weekForm.reset();
+  delete submitButton.dataset.editId;
+  submitButton.textContent = "Add Week";
+
+  if (formHeading) {
+    formHeading.textContent = "Add a New Week";
+  }
+}
+
+function getFormFields() {
+  return {
+    title: titleInput.value.trim(),
+    start_date: startDateInput.value,
+    description: descriptionInput.value.trim(),
+    links: getLinksFromTextarea()
+  };
+}
 
 // --- Functions ---
 
@@ -54,7 +94,33 @@ let weeks = [];
  *      The data-id holds the integer primary key from the weeks table.
  */
 function createWeekRow(week) {
-  // ... your implementation here ...
+  const row = document.createElement("tr");
+
+  const titleCell = document.createElement("td");
+  titleCell.textContent = week.title || "";
+
+  const startDateCell = document.createElement("td");
+  startDateCell.textContent = week.start_date || "";
+
+  const descriptionCell = document.createElement("td");
+  descriptionCell.textContent = week.description || "";
+
+  const actionsCell = document.createElement("td");
+
+  const editButton = document.createElement("button");
+  editButton.className = "edit-btn";
+  editButton.dataset.id = week.id;
+  editButton.textContent = "Edit";
+
+  const deleteButton = document.createElement("button");
+  deleteButton.className = "delete-btn";
+  deleteButton.dataset.id = week.id;
+  deleteButton.textContent = "Delete";
+
+  actionsCell.append(editButton, deleteButton);
+  row.append(titleCell, startDateCell, descriptionCell, actionsCell);
+
+  return row;
 }
 
 /**
@@ -67,7 +133,11 @@ function createWeekRow(week) {
  *    to the table body.
  */
 function renderTable() {
-  // ... your implementation here ...
+  weeksTbody.innerHTML = "";
+
+  weeks.forEach(function (week) {
+    weeksTbody.appendChild(createWeekRow(week));
+  });
 }
 
 /**
@@ -93,11 +163,49 @@ function renderTable() {
  *        - Reset the form.
  */
 async function handleAddWeek(event) {
-  // ... your implementation here ...
+  event.preventDefault();
+
+  const fields = getFormFields();
+  const editId = submitButton.dataset.editId;
+
+  if (editId) {
+    await handleUpdateWeek(Number(editId), fields);
+    return;
+  }
+
+  try {
+    const response = await fetch(API_URL, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify(fields)
+    });
+
+    const result = await response.json();
+
+    if (!response.ok || !result.success) {
+      throw new Error(result.message || "Unable to add week.");
+    }
+
+    const newWeek = result.data || {
+      id: result.id,
+      title: fields.title,
+      start_date: fields.start_date,
+      description: fields.description,
+      links: fields.links
+    };
+
+    weeks.push(newWeek);
+    renderTable();
+    resetFormMode();
+  } catch (error) {
+    alert(error.message || "Unable to add week.");
+  }
 }
 
 /**
- * TODO: Implement handleUpdateWeek (async).
+ * Implement handleUpdateWeek (async).
  *
  * Parameters:
  *   id     — the integer primary key of the week being edited.
@@ -114,11 +222,48 @@ async function handleAddWeek(event) {
  *      its data-edit-id attribute.
  */
 async function handleUpdateWeek(id, fields) {
-  // ... your implementation here ...
+  try {
+    const response = await fetch(API_URL, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        id: id,
+        title: fields.title,
+        start_date: fields.start_date,
+        description: fields.description,
+        links: fields.links
+      })
+    });
+
+    const result = await response.json();
+
+    if (!response.ok || !result.success) {
+      throw new Error(result.message || "Unable to update week.");
+    }
+
+    const updatedWeek = result.data || {
+      id: id,
+      title: fields.title,
+      start_date: fields.start_date,
+      description: fields.description,
+      links: fields.links
+    };
+
+    weeks = weeks.map(function (week) {
+      return Number(week.id) === Number(id) ? updatedWeek : week;
+    });
+
+    renderTable();
+    resetFormMode();
+  } catch (error) {
+    alert(error.message || "Unable to update week.");
+  }
 }
 
 /**
- * TODO: Implement handleTableClick (async).
+ * Implement handleTableClick (async).
  *
  * This is a delegated click listener on the weeks table body.
  * It should:
@@ -138,11 +283,61 @@ async function handleUpdateWeek(id, fields) {
  *       and set its data-edit-id attribute to the week's id.
  */
 async function handleTableClick(event) {
-  // ... your implementation here ...
+  if (event.target.classList.contains("delete-btn")) {
+    const id = Number(event.target.dataset.id);
+
+    if (!confirm("Delete this week?")) {
+      return;
+    }
+
+    try {
+      const response = await fetch(API_URL + "?id=" + encodeURIComponent(id), {
+        method: "DELETE"
+      });
+
+      const result = await response.json();
+
+      if (!response.ok || !result.success) {
+        throw new Error(result.message || "Unable to delete week.");
+      }
+
+      weeks = weeks.filter(function (week) {
+        return Number(week.id) !== id;
+      });
+
+      renderTable();
+      resetFormMode();
+    } catch (error) {
+      alert(error.message || "Unable to delete week.");
+    }
+  }
+
+  if (event.target.classList.contains("edit-btn")) {
+    const id = Number(event.target.dataset.id);
+    const week = weeks.find(function (item) {
+      return Number(item.id) === id;
+    });
+
+    if (!week) {
+      return;
+    }
+
+    titleInput.value = week.title || "";
+    startDateInput.value = week.start_date || "";
+    descriptionInput.value = week.description || "";
+    linksInput.value = normalizeLinks(week.links).join("\n");
+
+    submitButton.textContent = "Update Week";
+    submitButton.dataset.editId = week.id;
+
+    if (formHeading) {
+      formHeading.textContent = "Edit Week";
+    }
+  }
 }
 
 /**
- * TODO: Implement loadAndInitialize (async).
+ * Implement loadAndInitialize (async).
  *
  * It should:
  * 1. Send a GET to './api/index.php'.
@@ -155,7 +350,29 @@ async function handleTableClick(event) {
  *    (calls handleTableClick — event delegation for edit and delete).
  */
 async function loadAndInitialize() {
-  // ... your implementation here ...
+  try {
+    const response = await fetch(API_URL);
+    const result = await response.json();
+
+    if (!response.ok || !result.success) {
+      throw new Error(result.message || "Unable to load weeks.");
+    }
+
+    weeks = Array.isArray(result.data) ? result.data : [];
+    renderTable();
+
+    weekForm.addEventListener("submit", handleAddWeek);
+    weeksTbody.addEventListener("click", handleTableClick);
+  } catch (error) {
+    weeksTbody.innerHTML = "";
+
+    const row = document.createElement("tr");
+    const cell = document.createElement("td");
+    cell.colSpan = 4;
+    cell.textContent = error.message || "Unable to load weeks.";
+    row.appendChild(cell);
+    weeksTbody.appendChild(row);
+  }
 }
 
 // --- Initial Page Load ---

@@ -91,11 +91,37 @@ button:hover {
 
 .btn-primary,
 #add-assignment,
+#add-week,
 #comment-form button[type="submit"],
 .edit-btn {
     background: var(--color-main);
     border-color: var(--color-main);
     color: #ffffff;
+}
+
+.table-wrapper {
+    overflow-x: auto;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+table th,
+table td {
+    padding: 12px;
+    text-align: left;
+    border-bottom: 1px solid var(--color-border);
+}
+
+table th {
+    background: var(--color-background);
+    font-weight: 600;
+}
+
+table tr:hover {
+    background: var(--color-background);
 }
 
 .btn-primary:hover,

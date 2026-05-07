@@ -43,14 +43,18 @@ let currentWeekId  = null;  // integer id from the weeks table
 let currentComments = [];
 
 // --- Element Selections ---
-// TODO: Select each element by its id:
-//   weekTitle, weekStartDate, weekDescription,
-//   weekLinksList, commentList, commentForm, newCommentInput.
+const weekTitle = document.getElementById("week-title");
+const weekStartDate = document.getElementById("week-start-date");
+const weekDescription = document.getElementById("week-description");
+const weekLinksList = document.getElementById("week-links-list");
+const commentList = document.getElementById("comment-list");
+const commentForm = document.getElementById("comment-form");
+const newCommentInput = document.getElementById("new-comment");
 
 // --- Functions ---
 
 /**
- * TODO: Implement getWeekIdFromURL.
+ * Implement getWeekIdFromURL.
  *
  * It should:
  * 1. Read window.location.search.
@@ -59,11 +63,12 @@ let currentComments = [];
  *    the integer primary key of the week).
  */
 function getWeekIdFromURL() {
-  // ... your implementation here ...
+  const params = new URLSearchParams(window.location.search);
+  return params.get("id");
 }
 
 /**
- * TODO: Implement renderWeekDetails.
+ * Implement renderWeekDetails.
  *
  * Parameters:
  *   week — the week object returned by the API (see shape above).
@@ -79,11 +84,27 @@ function getWeekIdFromURL() {
  *    (week.links is already a decoded string array from the API.)
  */
 function renderWeekDetails(week) {
-  // ... your implementation here ...
+  weekTitle.textContent = week.title || "";
+  weekStartDate.textContent = "Starts on: " + (week.start_date || "");
+  weekDescription.textContent = week.description || "";
+
+  weekLinksList.innerHTML = "";
+
+  const links = Array.isArray(week.links) ? week.links : [];
+  links.forEach(function (url) {
+    const li = document.createElement("li");
+    const link = document.createElement("a");
+    link.href = url;
+    link.textContent = url;
+    link.target = "_blank";
+    link.rel = "noopener noreferrer";
+    li.appendChild(link);
+    weekLinksList.appendChild(li);
+  });
 }
 
 /**
- * TODO: Implement createCommentArticle.
+ * Implement createCommentArticle.
  *
  * Parameters:
  *   comment — one comment object from the API:
@@ -96,11 +117,21 @@ function renderWeekDetails(week) {
  *   </article>
  */
 function createCommentArticle(comment) {
-  // ... your implementation here ...
+  const article = document.createElement("article");
+  article.className = "card";
+
+  const textPara = document.createElement("p");
+  textPara.textContent = comment.text || "";
+
+  const footer = document.createElement("footer");
+  footer.textContent = "Posted by: " + (comment.author || "Anonymous");
+
+  article.append(textPara, footer);
+  return article;
 }
 
 /**
- * TODO: Implement renderComments.
+ * Implement renderComments.
  *
  * It should:
  * 1. Clear commentList (set innerHTML to "").
@@ -109,11 +140,15 @@ function createCommentArticle(comment) {
  *    append the result to commentList.
  */
 function renderComments() {
-  // ... your implementation here ...
+  commentList.innerHTML = "";
+
+  currentComments.forEach(function (comment) {
+    commentList.appendChild(createCommentArticle(comment));
+  });
 }
 
 /**
- * TODO: Implement handleAddComment (async).
+ * Implement handleAddComment (async).
  *
  * This is the event handler for commentForm's 'submit' event.
  * It should:
@@ -134,11 +169,50 @@ function renderComments() {
  *    - Clear newCommentInput.
  */
 async function handleAddComment(event) {
-  // ... your implementation here ...
+  event.preventDefault();
+
+  const commentText = newCommentInput.value.trim();
+
+  if (!commentText) {
+    return;
+  }
+
+  try {
+    const response = await fetch("./api/index.php?action=comment", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        week_id: currentWeekId,
+        author: "Student",
+        text: commentText
+      })
+    });
+
+    const result = await response.json();
+
+    if (!response.ok || !result.success) {
+      throw new Error(result.message || "Unable to post comment.");
+    }
+
+    const newComment = result.data || {
+      id: result.id,
+      week_id: currentWeekId,
+      author: "Student",
+      text: commentText
+    };
+
+    currentComments.push(newComment);
+    renderComments();
+    newCommentInput.value = "";
+  } catch (error) {
+    alert(error.message || "Unable to post comment.");
+  }
 }
 
 /**
- * TODO: Implement initializePage (async).
+ * Implement initializePage (async).
  *
  * It should:
  * 1. Call getWeekIdFromURL() and store the result in currentWeekId.
@@ -162,7 +236,40 @@ async function handleAddComment(event) {
  *    - Set weekTitle.textContent = "Week not found."
  */
 async function initializePage() {
-  // ... your implementation here ...
+  currentWeekId = getWeekIdFromURL();
+
+  if (!currentWeekId) {
+    weekTitle.textContent = "Week not found.";
+    return;
+  }
+
+  try {
+    const [weekResponse, commentsResponse] = await Promise.all([
+      fetch("./api/index.php?id=" + encodeURIComponent(currentWeekId)),
+      fetch("./api/index.php?action=comments&week_id=" + encodeURIComponent(currentWeekId))
+    ]);
+
+    const weekResult = await weekResponse.json();
+    const commentsResult = await commentsResponse.json();
+
+    if (!weekResponse.ok || !weekResult.success) {
+      weekTitle.textContent = "Week not found.";
+      return;
+    }
+
+    const week = weekResult.data;
+
+    currentComments = (commentsResponse.ok && commentsResult.success && Array.isArray(commentsResult.data))
+      ? commentsResult.data
+      : [];
+
+    renderWeekDetails(week);
+    renderComments();
+    commentForm.addEventListener("submit", handleAddComment);
+  } catch (error) {
+    weekTitle.textContent = "Error loading week.";
+    console.error(error);
+  }
 }
 
 // --- Initial Page Load ---

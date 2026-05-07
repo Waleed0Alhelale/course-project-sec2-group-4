@@ -12,12 +12,12 @@
 */
 
 // --- Element Selections ---
-// TODO: Select the section for the week list using its id 'week-list-section'.
+const weekListSection = document.getElementById("week-list-section");
 
 // --- Functions ---
 
 /**
- * TODO: Implement createWeekArticle.
+ * Implement createWeekArticle.
  *
  * Parameters:
  *   week — one object from the API response with the shape:
@@ -42,11 +42,28 @@
  * the weeks table) so that details.js can read the id from the URL.
  */
 function createWeekArticle(week) {
-  // ... your implementation here ...
+  const article = document.createElement("article");
+  article.className = "card";
+
+  const heading = document.createElement("h2");
+  heading.textContent = week.title || "";
+
+  const startDatePara = document.createElement("p");
+  startDatePara.textContent = "Starts on: " + (week.start_date || "");
+
+  const descriptionPara = document.createElement("p");
+  descriptionPara.textContent = week.description || "";
+
+  const link = document.createElement("a");
+  link.href = "details.html?id=" + week.id;
+  link.textContent = "View Details & Discussion";
+
+  article.append(heading, startDatePara, descriptionPara, link);
+  return article;
 }
 
 /**
- * TODO: Implement loadWeeks (async).
+ * Implement loadWeeks (async).
  *
  * It should:
  * 1. Use fetch() to GET data from './api/index.php'.
@@ -59,7 +76,27 @@ function createWeekArticle(week) {
  *    - Append the returned <article> to the list section.
  */
 async function loadWeeks() {
-  // ... your implementation here ...
+  try {
+    const response = await fetch("./api/index.php");
+    const result = await response.json();
+
+    if (!response.ok || !result.success) {
+      throw new Error(result.message || "Unable to load weeks.");
+    }
+
+    weekListSection.innerHTML = "";
+
+    const weeks = Array.isArray(result.data) ? result.data : [];
+    weeks.forEach(function (week) {
+      weekListSection.appendChild(createWeekArticle(week));
+    });
+  } catch (error) {
+    weekListSection.innerHTML = "";
+
+    const errorPara = document.createElement("p");
+    errorPara.textContent = error.message || "Unable to load weeks.";
+    weekListSection.appendChild(errorPara);
+  }
 }
 
 // --- Initial Page Load ---
