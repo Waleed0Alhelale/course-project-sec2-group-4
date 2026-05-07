@@ -121,6 +121,7 @@ function createWeekRow(week) {
   row.append(titleCell, startDateCell, descriptionCell, actionsCell);
 
   return row;
+
 }
 
 /**
