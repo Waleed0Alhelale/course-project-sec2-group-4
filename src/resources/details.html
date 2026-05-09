@@ -1,75 +1,300 @@
-<!--
-  Requirement: Create the Dedicated Page for a Single Resource
-
-  Instructions:
-  This page displays the details for one resource and allows for discussion.
-  All content is loaded dynamically by details.js using the resource id
-  from the URL query string (e.g., details.html?id=1).
--->
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <!-- TODO: Add meta tags for charset and viewport. -->
-    
-    <!-- TODO: Add a title. You can make it dynamic later, but for now, use "Resource Details". -->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Resource Details</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+    <script src="details.js" defer></script>
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-    <!-- TODO: Link to your CSS framework or stylesheet. -->
+        :root {
+            --ink:       #1a1612;
+            --paper:     #f5f0e8;
+            --cream:     #ede7d9;
+            --rust:      #c0510a;
+            --rust-light:#e8733a;
+            --muted:     #7a7060;
+            --border:    #d8d0c0;
+            --shadow:    rgba(26,22,18,.12);
+        }
 
-    <!-- TODO: Link this script file:
-         <script src="details.js" defer></script> -->
+        body {
+            font-family: 'DM Sans', sans-serif;
+            background: var(--paper);
+            color: var(--ink);
+            min-height: 100vh;
+            line-height: 1.65;
+        }
+
+        /* ── HEADER ─────────────────────────────────── */
+        header {
+            background: var(--ink);
+            color: var(--paper);
+            padding: 3rem 2rem 2.5rem;
+            position: relative;
+            overflow: hidden;
+        }
+        header::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: repeating-linear-gradient(
+                -45deg,
+                transparent,
+                transparent 28px,
+                rgba(255,255,255,.03) 28px,
+                rgba(255,255,255,.03) 29px
+            );
+        }
+        header .inner {
+            max-width: 860px;
+            margin: 0 auto;
+            position: relative;
+        }
+        header .eyebrow {
+            font-size: .7rem;
+            letter-spacing: .18em;
+            text-transform: uppercase;
+            color: var(--rust-light);
+            margin-bottom: .75rem;
+            font-weight: 500;
+        }
+        h1#resource-title {
+            font-family: 'Playfair Display', serif;
+            font-size: clamp(1.8rem, 5vw, 3rem);
+            font-weight: 700;
+            line-height: 1.2;
+            color: var(--paper);
+        }
+        h1#resource-title:empty::after {
+            content: 'Loading resource…';
+            opacity: .4;
+        }
+
+        /* ── MAIN ────────────────────────────────────── */
+        main {
+            max-width: 860px;
+            margin: 0 auto;
+            padding: 2.5rem 2rem 4rem;
+            display: grid;
+            gap: 2.5rem;
+        }
+
+        /* ── ARTICLE: resource info ──────────────────── */
+        article.resource-card {
+            background: #fff;
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            padding: 2rem 2.25rem;
+            box-shadow: 0 2px 12px var(--shadow);
+            position: relative;
+        }
+        article.resource-card::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0;
+            width: 4px; height: 100%;
+            background: var(--rust);
+            border-radius: 4px 0 0 4px;
+        }
+        .resource-label {
+            font-size: .68rem;
+            letter-spacing: .16em;
+            text-transform: uppercase;
+            color: var(--muted);
+            font-weight: 500;
+            margin-bottom: .6rem;
+        }
+        p#resource-description {
+            font-size: 1.05rem;
+            color: #3a3530;
+            margin-bottom: 1.5rem;
+            font-weight: 300;
+        }
+        p#resource-description:empty::after {
+            content: 'Description loading…';
+            color: var(--muted);
+            font-style: italic;
+        }
+        a#resource-link {
+            display: inline-flex;
+            align-items: center;
+            gap: .5rem;
+            background: var(--rust);
+            color: #fff;
+            text-decoration: none;
+            font-size: .88rem;
+            font-weight: 500;
+            padding: .65rem 1.4rem;
+            border-radius: 3px;
+            letter-spacing: .02em;
+            transition: background .18s, transform .12s;
+        }
+        a#resource-link:hover {
+            background: var(--rust-light);
+            transform: translateY(-1px);
+        }
+        a#resource-link::after { content: '↗'; font-size: 1em; }
+
+        /* ── DISCUSSION SECTION ──────────────────────── */
+        section#discussion-forum {
+            display: grid;
+            gap: 1.75rem;
+        }
+        section#discussion-forum h2 {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.5rem;
+            font-weight: 600;
+            border-bottom: 2px solid var(--ink);
+            padding-bottom: .5rem;
+        }
+
+        /* comment list */
+        div#comment-list {
+            display: grid;
+            gap: 1rem;
+        }
+        div#comment-list:empty::after {
+            content: 'No comments yet — be the first!';
+            display: block;
+            color: var(--muted);
+            font-style: italic;
+            font-size: .95rem;
+            padding: 1rem 0;
+        }
+
+        /* individual comment (injected by details.js) */
+        #comment-list article {
+            background: var(--cream);
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            padding: 1.1rem 1.4rem;
+        }
+        #comment-list article p {
+            margin-bottom: .5rem;
+            font-size: .97rem;
+        }
+        #comment-list article footer {
+            font-size: .78rem;
+            color: var(--muted);
+            letter-spacing: .02em;
+        }
+
+        /* ── FORM ────────────────────────────────────── */
+        form#comment-form {
+            background: #fff;
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            padding: 2rem 2.25rem;
+            box-shadow: 0 2px 8px var(--shadow);
+        }
+        fieldset {
+            border: none;
+            display: grid;
+            gap: 1rem;
+        }
+        legend {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: .5rem;
+        }
+        label[for="new-comment"] {
+            font-size: .8rem;
+            letter-spacing: .12em;
+            text-transform: uppercase;
+            color: var(--muted);
+            font-weight: 500;
+        }
+        textarea#new-comment {
+            width: 100%;
+            min-height: 120px;
+            padding: .85rem 1rem;
+            border: 1.5px solid var(--border);
+            border-radius: 3px;
+            font-family: 'DM Sans', sans-serif;
+            font-size: .97rem;
+            background: var(--paper);
+            color: var(--ink);
+            resize: vertical;
+            transition: border-color .18s, box-shadow .18s;
+        }
+        textarea#new-comment:focus {
+            outline: none;
+            border-color: var(--rust);
+            box-shadow: 0 0 0 3px rgba(192,81,10,.12);
+        }
+        button[type="submit"] {
+            justify-self: start;
+            background: var(--ink);
+            color: var(--paper);
+            border: none;
+            padding: .7rem 1.6rem;
+            font-family: 'DM Sans', sans-serif;
+            font-size: .88rem;
+            font-weight: 500;
+            letter-spacing: .04em;
+            border-radius: 3px;
+            cursor: pointer;
+            transition: background .18s, transform .12s;
+        }
+        button[type="submit"]:hover {
+            background: var(--rust);
+            transform: translateY(-1px);
+        }
+
+        /* ── RESPONSIVE ──────────────────────────────── */
+        @media (max-width: 600px) {
+            header { padding: 2rem 1.25rem 1.75rem; }
+            main   { padding: 1.5rem 1.25rem 3rem; }
+            article.resource-card,
+            form#comment-form { padding: 1.25rem 1.1rem; }
+        }
+    </style>
 </head>
 <body>
-    <!-- TODO: Create a 'header' with a main heading ('h1').
-         Add id="resource-title" to the <h1>. This id is required by details.js. -->
 
-    <!-- TODO: Create the 'main' content area. -->
+    <!-- HEADER -->
+    <header>
+        <div class="inner">
+            <p class="eyebrow">Resource Details</p>
+            <h1 id="resource-title"></h1>
+        </div>
+    </header>
+
+    <!-- MAIN -->
+    <main>
 
         <!-- Section 1: Resource Information -->
-        <!-- TODO: Use an 'article' to display the main resource information. -->
-            <!-- TODO: Add a paragraph ('p') for the resource description.
-                 Add id="resource-description" to this <p>. This id is required by details.js. -->
-            <!-- TODO: Add an anchor tag ('a') that links to the actual resource URL.
-                 - Add id="resource-link" to this <a>. This id is required by details.js.
-                 - Text should be "Access Resource Material".
-                 - Add target="_blank" to open it in a new tab. -->
-        <!-- End of article. -->
+        <article class="resource-card">
+            <p class="resource-label">About this resource</p>
+            <p id="resource-description"></p>
+            <a id="resource-link" href="#" target="_blank">Access Resource Material</a>
+        </article>
 
         <!-- Section 2: Discussion Forum -->
-        <!-- TODO: Create a 'section' for the discussion, with an 'id' of "discussion-forum". -->
-            <!-- TODO: Add a sub-heading ('h2') "Discussion". -->
+        <section id="discussion-forum">
+            <h2>Discussion</h2>
 
-            <!-- Subsection 2.1: Existing Comments -->
-            <!-- TODO: Add a <div> for the list of comments.
-                 Add id="comment-list" to this <div>. This id is required by details.js.
-                 Comments will be injected here dynamically by details.js. -->
+            <!-- 2.1 Existing comments (injected by details.js) -->
+            <div id="comment-list"></div>
 
-                <!-- Each comment follows this structure: -->
-                <!-- TODO: Use an 'article' for each comment. -->
-                    <!-- TODO: Use a 'p' for the comment text. -->
-                    <!-- TODO: Use a 'footer' to show the author
-                         (e.g., "Posted by: Ali Hassan"). -->
-                <!-- End of comment article. -->
+            <!-- 2.2 Add a comment -->
+            <form id="comment-form" action="#">
+                <fieldset>
+                    <legend>Leave a Comment</legend>
+                    <label for="new-comment">Your comment</label>
+                    <textarea id="new-comment" required placeholder="Share your thoughts…"></textarea>
+                    <button type="submit">Post Comment</button>
+                </fieldset>
+            </form>
 
-            <!-- End of comment list div. -->
+        </section>
 
-            <!-- Subsection 2.2: Add a Comment Form -->
-            <!-- TODO: Create a 'form' for users to post new comments.
-                 Add id="comment-form" to this <form>. This id is required by details.js.
-                 Action can be '#'. -->
-                <!-- TODO: Use a 'fieldset' to group the controls. -->
-                    <!-- TODO: Add a 'legend', e.g., "Leave a Comment". -->
+    </main>
 
-                    <!-- TODO: Add a 'label' and 'textarea' for the comment box.
-                         - label 'for': "new-comment"
-                         - textarea 'id': "new-comment", required
-                         This id is required by details.js. -->
-                    
-                    <!-- TODO: Add a 'button' to submit the comment.
-                         - type="submit", Text: "Post Comment" -->
-                <!-- End of fieldset. -->
-            <!-- End of form. -->
-        <!-- End of discussion section. -->
-
-    <!-- End of main. -->
 </body>
 </html>
