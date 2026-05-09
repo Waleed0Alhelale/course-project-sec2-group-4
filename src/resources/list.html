@@ -1,46 +1,186 @@
-<!--
-  Requirement: Create the Student View for Course Resources
-
-  Instructions:
-  This page is a read-only view for students to see all available course materials.
-  Each resource should link to a dedicated detail page.
--->
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <!-- TODO: Add meta tags for charset and viewport. -->
-    
-    <!-- TODO: Add a title, e.g., "Course Resources". -->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Course Resources</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+    <script src="list.js" defer></script>
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-    <!-- TODO: Link to your CSS framework or stylesheet. -->
+        :root {
+            --ink:        #1a1612;
+            --paper:      #f5f0e8;
+            --cream:      #ede7d9;
+            --rust:       #c0510a;
+            --rust-light: #e8733a;
+            --muted:      #7a7060;
+            --border:     #d8d0c0;
+            --shadow:     rgba(26,22,18,.1);
+        }
 
-    <!-- TODO: Link this script file:
-         <script src="list.js" defer></script> -->
+        body {
+            font-family: 'DM Sans', sans-serif;
+            background: var(--paper);
+            color: var(--ink);
+            min-height: 100vh;
+            line-height: 1.65;
+        }
+
+        /* ── HEADER ─────────────────────────────────── */
+        header {
+            background: var(--ink);
+            color: var(--paper);
+            padding: 3rem 2rem 2.5rem;
+            position: relative;
+            overflow: hidden;
+        }
+        header::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: repeating-linear-gradient(
+                -45deg,
+                transparent,
+                transparent 28px,
+                rgba(255,255,255,.03) 28px,
+                rgba(255,255,255,.03) 29px
+            );
+        }
+        header .inner {
+            max-width: 900px;
+            margin: 0 auto;
+            position: relative;
+        }
+        header .eyebrow {
+            font-size: .7rem;
+            letter-spacing: .18em;
+            text-transform: uppercase;
+            color: var(--rust-light);
+            margin-bottom: .6rem;
+            font-weight: 500;
+        }
+        header h1 {
+            font-family: 'Playfair Display', serif;
+            font-size: clamp(1.9rem, 5vw, 3rem);
+            font-weight: 700;
+            line-height: 1.2;
+        }
+        header p.subtitle {
+            margin-top: .6rem;
+            font-size: .97rem;
+            color: rgba(245,240,232,.6);
+            font-weight: 300;
+        }
+
+        /* ── MAIN ────────────────────────────────────── */
+        main {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 2.5rem 2rem 4rem;
+        }
+
+        /* ── RESOURCE LIST ───────────────────────────── */
+        section#resource-list-section {
+            display: grid;
+            gap: 1.25rem;
+        }
+
+        /* empty state */
+        section#resource-list-section:empty::after {
+            content: 'No resources available yet.';
+            display: block;
+            color: var(--muted);
+            font-style: italic;
+            padding: 2rem 0;
+        }
+
+        /* ── RESOURCE ARTICLE (injected by list.js) ──── */
+        #resource-list-section article {
+            background: #fff;
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            padding: 1.6rem 2rem;
+            box-shadow: 0 2px 10px var(--shadow);
+            display: grid;
+            grid-template-rows: auto auto auto;
+            gap: .6rem;
+            position: relative;
+            transition: transform .15s, box-shadow .15s;
+        }
+        #resource-list-section article::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0;
+            width: 4px; height: 100%;
+            background: var(--rust);
+            border-radius: 4px 0 0 4px;
+        }
+        #resource-list-section article:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px var(--shadow);
+        }
+
+        #resource-list-section article h2,
+        #resource-list-section article h3 {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: var(--ink);
+        }
+
+        #resource-list-section article p {
+            font-size: .96rem;
+            color: #4a4540;
+            font-weight: 300;
+        }
+
+        #resource-list-section article a {
+            justify-self: start;
+            display: inline-flex;
+            align-items: center;
+            gap: .4rem;
+            color: var(--rust);
+            text-decoration: none;
+            font-size: .85rem;
+            font-weight: 500;
+            letter-spacing: .02em;
+            border-bottom: 1.5px solid transparent;
+            transition: border-color .15s, color .15s;
+            margin-top: .25rem;
+        }
+        #resource-list-section article a:hover {
+            color: var(--rust-light);
+            border-bottom-color: var(--rust-light);
+        }
+        #resource-list-section article a::after { content: '→'; }
+
+        /* ── RESPONSIVE ──────────────────────────────── */
+        @media (max-width: 600px) {
+            header { padding: 2rem 1.25rem 1.75rem; }
+            main   { padding: 1.5rem 1.25rem 3rem; }
+            #resource-list-section article { padding: 1.25rem 1.1rem; }
+        }
+    </style>
 </head>
 <body>
 
-    <!-- TODO: Create a 'header' with a main heading ('h1') "Course Resources". -->
+    <!-- HEADER -->
+    <header>
+        <div class="inner">
+            <p class="eyebrow">Student View</p>
+            <h1>Course Resources</h1>
+            <p class="subtitle">Browse available materials and join the discussion.</p>
+        </div>
+    </header>
 
-    <!-- TODO: Create the 'main' content area. -->
-
-        <!-- TODO: Create a 'section' with id="resource-list-section" to contain
-             the list of resources. This id is required by list.js. -->
-
-            <!-- Resources will be injected here dynamically by list.js.
-                 Each resource will follow this structure: -->
-
-            <!-- Example Resource Article Structure: -->
-            <!-- TODO: Use an 'article' element for each resource. -->
-                <!-- TODO: Add a heading ('h2' or 'h3') for the resource title. -->
-                <!-- TODO: Add a paragraph ('p') for the resource description. -->
-                <!-- TODO: Add an anchor tag ('a') that links to the detail page.
-                     - The 'href' must be "details.html?id={resource_id}".
-                     - This is set dynamically by list.js using the resource's id.
-                     - The link text should be "View Resource & Discussion". -->
-            <!-- End of article. -->
-
-        <!-- End of resource list section. -->
-    <!-- End of main. -->
+    <!-- MAIN -->
+    <main>
+        <!-- Resource list — articles injected dynamically by list.js -->
+        <section id="resource-list-section"></section>
+    </main>
 
 </body>
 </html>
