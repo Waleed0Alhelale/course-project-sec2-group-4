@@ -1,6 +1,5 @@
 <!--
   Requirement: Create the Admin View for Course Resources
-
   Instructions:
   Fill in the HTML elements as described in the comments.
   This page allows the teacher (admin) to perform full CRUD operations on course resources.
@@ -8,83 +7,501 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <!-- TODO: Add the 'meta' tag for character encoding (UTF-8). -->
-    
-    <!-- TODO: Add the responsive 'viewport' meta tag.
-         The 'name' should be 'viewport' and the 'content' should set the 'width' to 'device-width'
-         and the 'initial-scale' to '1.0'. -->
+    <!-- Character encoding -->
+    <meta charset="UTF-8">
 
-    <!-- TODO: Add a title, e.g., "Manage Resources". -->
+    <!-- Responsive viewport -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <!-- TODO: Link to your CSS framework or stylesheet. -->
+    <!-- Page title -->
+    <title>Manage Resources</title>
 
-    <!-- TODO: Link this script file:
-         <script src="admin.js" defer></script> -->
+    <!-- Google Fonts: DM Serif Display + DM Sans -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+
+    <!-- Admin script -->
+    <script src="admin.js" defer></script>
+
+    <style>
+        /* ── Design tokens ─────────────────────────────────────────────────── */
+        :root {
+            --bg:          #f5f2ec;
+            --surface:     #fffdf8;
+            --surface-2:   #f0ece3;
+            --border:      #ddd8cc;
+            --text:        #1a1714;
+            --text-muted:  #7a7166;
+            --accent:      #2d5016;
+            --accent-light:#e8f0e0;
+            --danger:      #8b1a1a;
+            --danger-light:#f5e5e5;
+            --warning:     #7a4f00;
+            --warning-light:#fef3dc;
+            --radius:      6px;
+            --shadow:      0 2px 8px rgba(0,0,0,.08), 0 1px 2px rgba(0,0,0,.06);
+            --shadow-lg:   0 8px 32px rgba(0,0,0,.12);
+            --transition:  220ms ease;
+        }
+
+        /* ── Reset ─────────────────────────────────────────────────────────── */
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        /* ── Base ──────────────────────────────────────────────────────────── */
+        body {
+            font-family: 'DM Sans', sans-serif;
+            font-weight: 400;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            line-height: 1.6;
+        }
+
+        /* ── Header ────────────────────────────────────────────────────────── */
+        header {
+            background: var(--surface);
+            border-bottom: 1px solid var(--border);
+            padding: 28px 48px;
+            display: flex;
+            align-items: baseline;
+            gap: 16px;
+        }
+        header h1 {
+            font-family: 'DM Serif Display', serif;
+            font-size: clamp(1.6rem, 3vw, 2.2rem);
+            font-weight: 400;
+            letter-spacing: -.5px;
+            color: var(--text);
+        }
+        header .badge {
+            font-size: .72rem;
+            font-weight: 600;
+            letter-spacing: .1em;
+            text-transform: uppercase;
+            background: var(--accent);
+            color: #fff;
+            padding: 3px 10px;
+            border-radius: 20px;
+        }
+
+        /* ── Main layout ───────────────────────────────────────────────────── */
+        main {
+            max-width: 1140px;
+            margin: 0 auto;
+            padding: 48px 32px 80px;
+            display: grid;
+            gap: 48px;
+        }
+
+        /* ── Section headings ──────────────────────────────────────────────── */
+        section > h2 {
+            font-family: 'DM Serif Display', serif;
+            font-size: 1.25rem;
+            font-weight: 400;
+            color: var(--text);
+            margin-bottom: 20px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        section > h2::before {
+            content: '';
+            display: inline-block;
+            width: 4px;
+            height: 1.1em;
+            background: var(--accent);
+            border-radius: 2px;
+            flex-shrink: 0;
+        }
+
+        /* ── Form card ─────────────────────────────────────────────────────── */
+        #resource-form {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            overflow: hidden;
+        }
+        #resource-form fieldset {
+            border: none;
+            padding: 32px;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px 28px;
+        }
+        #resource-form legend {
+            display: none; /* visually hidden — h2 acts as label */
+        }
+
+        /* Full-width rows */
+        .field-full { grid-column: 1 / -1; }
+
+        .field {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+        .field label {
+            font-size: .8rem;
+            font-weight: 600;
+            letter-spacing: .06em;
+            text-transform: uppercase;
+            color: var(--text-muted);
+        }
+        .field input,
+        .field textarea {
+            font-family: 'DM Sans', sans-serif;
+            font-size: .95rem;
+            color: var(--text);
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 10px 14px;
+            width: 100%;
+            transition: border-color var(--transition), box-shadow var(--transition);
+            outline: none;
+        }
+        .field textarea {
+            resize: vertical;
+            min-height: 90px;
+        }
+        .field input:focus,
+        .field textarea:focus {
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px var(--accent-light);
+        }
+
+        /* Form footer strip */
+        .form-footer {
+            background: var(--surface-2);
+            border-top: 1px solid var(--border);
+            padding: 16px 32px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+        }
+        #form-status {
+            font-size: .85rem;
+            color: var(--text-muted);
+            font-style: italic;
+        }
+
+        /* ── Buttons ───────────────────────────────────────────────────────── */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 9px 20px;
+            font-family: 'DM Sans', sans-serif;
+            font-size: .875rem;
+            font-weight: 500;
+            border-radius: var(--radius);
+            border: 1px solid transparent;
+            cursor: pointer;
+            transition: background var(--transition), color var(--transition),
+                        border-color var(--transition), box-shadow var(--transition),
+                        transform var(--transition);
+            white-space: nowrap;
+        }
+        .btn:active { transform: translateY(1px); }
+
+        .btn-primary {
+            background: var(--accent);
+            color: #fff;
+            border-color: var(--accent);
+        }
+        .btn-primary:hover {
+            background: #233f10;
+            box-shadow: 0 4px 12px rgba(45,80,22,.35);
+        }
+
+        .btn-secondary {
+            background: transparent;
+            color: var(--text-muted);
+            border-color: var(--border);
+        }
+        .btn-secondary:hover {
+            background: var(--surface-2);
+            color: var(--text);
+        }
+
+        .btn-warning {
+            background: var(--warning-light);
+            color: var(--warning);
+            border-color: #e0c880;
+            font-size: .8rem;
+            padding: 6px 14px;
+        }
+        .btn-warning:hover {
+            background: #fde8a0;
+            box-shadow: 0 2px 8px rgba(122,79,0,.18);
+        }
+
+        .btn-danger {
+            background: var(--danger-light);
+            color: var(--danger);
+            border-color: #e0a0a0;
+            font-size: .8rem;
+            padding: 6px 14px;
+        }
+        .btn-danger:hover {
+            background: #f5cece;
+            box-shadow: 0 2px 8px rgba(139,26,26,.18);
+        }
+
+        /* ── Table ─────────────────────────────────────────────────────────── */
+        .table-wrapper {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            overflow: hidden;
+            overflow-x: auto;
+        }
+
+        #resources-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: .9rem;
+        }
+
+        #resources-table thead {
+            background: var(--surface-2);
+            border-bottom: 1px solid var(--border);
+        }
+        #resources-table thead th {
+            padding: 12px 16px;
+            text-align: left;
+            font-size: .72rem;
+            font-weight: 600;
+            letter-spacing: .08em;
+            text-transform: uppercase;
+            color: var(--text-muted);
+            white-space: nowrap;
+        }
+
+        #resources-table tbody tr {
+            border-bottom: 1px solid var(--border);
+            transition: background var(--transition);
+        }
+        #resources-table tbody tr:last-child { border-bottom: none; }
+        #resources-table tbody tr:hover { background: var(--surface-2); }
+
+        #resources-table tbody td {
+            padding: 14px 16px;
+            vertical-align: middle;
+            color: var(--text);
+        }
+
+        /* Title cell */
+        .td-title {
+            font-weight: 500;
+            max-width: 200px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        /* Description cell */
+        .td-desc {
+            color: var(--text-muted);
+            max-width: 260px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        /* Link cell */
+        .td-link a {
+            color: var(--accent);
+            text-decoration: none;
+            font-size: .85rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            max-width: 200px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        .td-link a:hover { text-decoration: underline; }
+
+        /* Actions cell */
+        .td-actions {
+            white-space: nowrap;
+            display: flex;
+            gap: 8px;
+        }
+
+        /* Empty state */
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: var(--text-muted);
+        }
+        .empty-state p { font-size: .95rem; margin-top: 8px; }
+
+        /* ── Toast / notification ──────────────────────────────────────────── */
+        #toast {
+            position: fixed;
+            bottom: 28px;
+            right: 28px;
+            background: var(--text);
+            color: #fff;
+            font-size: .875rem;
+            padding: 12px 20px;
+            border-radius: var(--radius);
+            box-shadow: var(--shadow-lg);
+            opacity: 0;
+            transform: translateY(8px);
+            transition: opacity .25s ease, transform .25s ease;
+            pointer-events: none;
+            z-index: 100;
+        }
+        #toast.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* ── Responsive ────────────────────────────────────────────────────── */
+        @media (max-width: 700px) {
+            header { padding: 20px 20px; }
+            main { padding: 28px 16px 60px; }
+            #resource-form fieldset {
+                grid-template-columns: 1fr;
+                padding: 20px;
+            }
+            .form-footer { padding: 14px 20px; flex-direction: column; align-items: stretch; }
+            .btn-primary { width: 100%; justify-content: center; }
+        }
+    </style>
 </head>
 <body>
 
-    <!-- TODO: Create a 'header' with a main heading ('h1') "Manage Course Resources". -->
+    <!-- ── Header ─────────────────────────────────────────────────────────── -->
+    <header>
+        <h1>Manage Course Resources</h1>
+        <span class="badge">Admin</span>
+    </header>
 
-    <!-- TODO: Create the 'main' content area. -->
+    <!-- ── Main content ───────────────────────────────────────────────────── -->
+    <main>
 
-        <!-- Section 1: Add/Edit Resource Form -->
-        <!-- TODO: Create a 'section' for the form. -->
-            <!-- TODO: Add a sub-heading ('h2') "Add a New Resource". -->
+        <!-- Section 1: Add / Edit Resource Form -->
+        <section aria-labelledby="form-heading">
+            <h2 id="form-heading">Add a New Resource</h2>
 
-            <!-- TODO: Create a 'form' with id="resource-form". Action can be '#'.
-                 This id is required by admin.js. -->
-                <!-- TODO: Use a 'fieldset' to group the form controls. -->
-                    <!-- TODO: Add a 'legend', e.g., "Resource Details". -->
+            <form id="resource-form" action="#">
 
-                    <!-- TODO: Add a 'label' and 'input' for the resource title.
-                         - label 'for': "resource-title"
-                         - input 'id': "resource-title", type="text", required -->
+                <fieldset>
+                    <legend>Resource Details</legend>
 
-                    <!-- TODO: Add a 'label' and 'textarea' for the resource description.
-                         - label 'for': "resource-description"
-                         - textarea 'id': "resource-description" -->
-                    
-                    <!-- TODO: Add a 'label' and 'input' for the resource link.
-                         - label 'for': "resource-link"
-                         - input 'id': "resource-link", type="url", required -->
+                    <!-- Title -->
+                    <div class="field">
+                        <label for="resource-title">Title</label>
+                        <input
+                            type="text"
+                            id="resource-title"
+                            name="title"
+                            placeholder="e.g. Introduction to Algorithms"
+                            required
+                            autocomplete="off"
+                        >
+                    </div>
 
-                    <!-- TODO: Add a 'button' to submit the form.
-                         - id="add-resource", type="submit", Text: "Add Resource" -->
-                <!-- End of fieldset. -->
-            <!-- End of form. -->
-        <!-- End of form section. -->
+                    <!-- Link -->
+                    <div class="field">
+                        <label for="resource-link">URL</label>
+                        <input
+                            type="url"
+                            id="resource-link"
+                            name="link"
+                            placeholder="https://example.com/resource"
+                            required
+                            autocomplete="off"
+                        >
+                    </div>
 
+                    <!-- Description — full width -->
+                    <div class="field field-full">
+                        <label for="resource-description">Description <span style="font-weight:400;text-transform:none;letter-spacing:0">(optional)</span></label>
+                        <textarea
+                            id="resource-description"
+                            name="description"
+                            placeholder="Briefly describe what this resource covers…"
+                            rows="3"
+                        ></textarea>
+                    </div>
 
-        <!-- Section 2: Existing Resources List -->
-        <!-- TODO: Create a 'section' to display the list of current resources. -->
-            <!-- TODO: Add a sub-heading ('h2') "Existing Resources". -->
+                </fieldset>
 
-            <!-- TODO: Create a 'table' with id="resources-table". -->
-                <!-- TODO: Create a 'thead' and a 'tr' inside it. -->
-                    <!-- TODO: Add 'th' elements for "Title", "Description", "Link", and "Actions". -->
-                
-                <!-- TODO: Create a 'tbody' with id="resources-tbody".
-                     This id is required by admin.js.
-                     Rows will be injected here dynamically by admin.js. -->
+                <!-- Form footer with submit -->
+                <div class="form-footer">
+                    <span id="form-status"></span>
+                    <div style="display:flex;gap:10px">
+                        <button type="button" id="cancel-edit" class="btn btn-secondary" style="display:none">
+                            Cancel
+                        </button>
+                        <button type="submit" id="add-resource" class="btn btn-primary">
+                            Add Resource
+                        </button>
+                    </div>
+                </div>
 
-                    <!-- Each row follows this structure: -->
-                    <!-- TODO: Create a 'tr' for each resource. -->
-                        <!-- TODO: Add a 'td' for the title. -->
-                        <!-- TODO: Add a 'td' for the description. -->
-                        <!-- TODO: Add a 'td' for the link. -->
+            </form>
+        </section>
 
-                        <!-- TODO: Add a 'td' containing the action buttons. -->
-                            <!-- TODO: Add an "Edit" button with class="edit-btn"
-                                 and data-id set to the resource's id. -->
-                            <!-- TODO: Add a "Delete" button with class="delete-btn"
-                                 and data-id set to the resource's id. -->
-                        <!-- End of actions 'td'. -->
-                    <!-- End of the row. -->
+        <!-- Section 2: Existing Resources Table -->
+        <section aria-labelledby="table-heading">
+            <h2 id="table-heading">Existing Resources</h2>
 
-                <!-- End of tbody. -->
-            <!-- End of table. -->
-        <!-- End of resources list section. -->
+            <div class="table-wrapper">
+                <table id="resources-table">
+                    <thead>
+                        <tr>
+                            <th>Title</th>
+                            <th>Description</th>
+                            <th>Link</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="resources-tbody">
+                        <!--
+                            Rows are injected dynamically by admin.js.
+                            Each row follows this structure:
 
-    <!-- End of main. -->
+                            <tr>
+                                <td class="td-title">{title}</td>
+                                <td class="td-desc">{description}</td>
+                                <td class="td-link"><a href="{link}" target="_blank" rel="noopener">{link}</a></td>
+                                <td>
+                                    <div class="td-actions">
+                                        <button class="btn btn-warning edit-btn"   data-id="{id}">Edit</button>
+                                        <button class="btn btn-danger  delete-btn" data-id="{id}">Delete</button>
+                                    </div>
+                                </td>
+                            </tr>
+                        -->
+                        <tr>
+                            <td colspan="4">
+                                <div class="empty-state">
+                                    <p>No resources yet. Add one above.</p>
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Toast notification (populated by admin.js) -->
+    <div id="toast" role="status" aria-live="polite"></div>
+
 </body>
 </html>
