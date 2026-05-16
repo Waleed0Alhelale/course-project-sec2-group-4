@@ -1,11 +1,5 @@
 <?php
-/**
- * Course Resources API
- */
 
-// ============================================================================
-// HEADERS AND INITIALIZATION
-// ============================================================================
 
 header('Content-Type: application/json');
 header('Access-Control-Allow-Origin: *');
@@ -31,9 +25,7 @@ $resourceId = $_GET['resource_id'] ?? null;
 $commentId  = $_GET['comment_id'] ?? null;
 
 
-// ============================================================================
-// RESOURCE FUNCTIONS
-// ============================================================================
+
 
 function getAllResources($db) {
     $sql = "SELECT id, title, description, link, created_at FROM resources";
@@ -187,9 +179,7 @@ function deleteResource($db, $resourceId) {
 }
 
 
-// ============================================================================
-// COMMENT FUNCTIONS
-// ============================================================================
+
 
 function getCommentsByResourceId($db, $resourceId) {
     if (!$resourceId || !is_numeric($resourceId)) {
@@ -268,9 +258,7 @@ function deleteComment($db, $commentId) {
 }
 
 
-// ============================================================================
-// MAIN REQUEST ROUTER
-// ============================================================================
+
 
 try {
     if ($method === 'GET') {
@@ -317,9 +305,7 @@ try {
 }
 
 
-// ============================================================================
-// HELPER FUNCTIONS
-// ============================================================================
+
 
 function sendResponse($data, $statusCode = 200) {
     http_response_code($statusCode);
